@@ -1,0 +1,53 @@
+# schema.graphql
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: String!
+  createdAt: String
+  updatedAt: String
+}
+
+type AuthPayload {
+  token: String! # For backward compatibility
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+type DeleteUserPayload {
+  success: Boolean!
+  message: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input SignupInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  name: String
+  email: String
+  password: String
+  role: String
+}
+
+type Query {
+  me: User
+  users: [User!]!
+  user(id: ID!): User
+}
+
+type Mutation {
+  signup(input: SignupInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!): DeleteUserPayload!
+}

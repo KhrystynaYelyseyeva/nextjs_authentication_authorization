@@ -1,0 +1,47 @@
+# version: "3.8"
+# services:
+#   postgres:
+#     image: postgres:14
+#     ports:
+#       - "5432:5432"
+#     environment:
+#       POSTGRES_PASSWORD: postgres
+#       POSTGRES_USER: postgres
+#       POSTGRES_DB: nextjs_auth_db
+#     volumes:
+#       - postgres-data:/var/lib/postgresql/data
+
+# volumes:
+#   postgres-data:
+version: "3.8"
+services:
+  postgres:
+    image: postgres:14
+    container_name: nextjs-auth-db
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_DB: ${DB_NAME:-nextjs_auth_db}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: nextjs-auth-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+volumes:
+  postgres-data:

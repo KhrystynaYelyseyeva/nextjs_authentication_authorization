@@ -6,22 +6,44 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.7",
+    "@apollo/server": "^4.11.3",
+    "@as-integrations/next": "^3.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.8",
+    "@mui/material": "^6.4.8",
+    "@prisma/client": "^6.5.0",
+    "apollo-server-core": "^3.13.0",
+    "bcryptjs": "^3.0.2",
+    "graphql": "^16.10.0",
+    "graphql-tag": "^2.12.6",
+    "next": "15.2.0",
+    "next-auth": "^4.24.11",
+    "pg": "^8.14.1",
+    "prisma": "^6.5.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.2.0"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@graphql-codegen/cli": "^5.0.6",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-operations": "^4.6.1",
+    "@graphql-codegen/typescript-react-apollo": "^4.3.2",
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
