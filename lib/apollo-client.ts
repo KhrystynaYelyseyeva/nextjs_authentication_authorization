@@ -7,7 +7,6 @@ import {
   from,
   Observable,
 } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 
 // Add tracking for auth request frequency
@@ -151,28 +150,10 @@ const httpLink = new HttpLink({
   credentials: "include", // Important for cookies
 });
 
-// Auth link for adding the token to requests
-const authLink = setContext((_, { headers }) => {
-  // Get the token from localStorage
-  let token = null;
-
-  if (typeof window !== "undefined") {
-    token = localStorage.getItem("authToken");
-  }
-
-  // Return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    },
-  };
-});
-
 // Create Apollo Client instance
 export const createApolloClient = () => {
   return new ApolloClient({
-    link: from([errorLink, authLink, httpLink]),
+    link: from([errorLink, httpLink]),
     cache: new InMemoryCache(),
     defaultOptions: {
       watchQuery: {

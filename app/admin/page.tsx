@@ -41,6 +41,7 @@ import {
   DELETE_USER_MUTATION,
   UsersQueryResult,
 } from "@/graphql/types";
+import UserEditorDialog from "@/components/admin/UserEditorDialog";
 
 export default function AdminPage() {
   // Get auth context
@@ -49,6 +50,8 @@ export default function AdminPage() {
   // State for user to edit or delete
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   // Fetch users data
   const { data, loading, error, refetch } = useEnhancedQuery<UsersQueryResult>(
@@ -82,7 +85,8 @@ export default function AdminPage() {
   // Handle user edit
   const handleEditUser = useCallback((user: User) => {
     setSelectedUser(user);
-    // Here you could open a modal for editing
+    setIsNewUser(false);
+    setShowEditDialog(true);
   }, []);
 
   // Handle user delete confirmation
@@ -102,6 +106,25 @@ export default function AdminPage() {
   const handleCloseDeleteDialog = useCallback(() => {
     setShowDeleteDialog(false);
   }, []);
+
+  // Handle add user
+  const handleAddUser = useCallback(() => {
+    setSelectedUser(null);
+    setIsNewUser(true);
+    setShowEditDialog(true);
+  }, []);
+
+  // Handle close edit dialog
+  const handleCloseEditDialog = useCallback(() => {
+    setShowEditDialog(false);
+    setSelectedUser(null);
+    setIsNewUser(false);
+  }, []);
+
+  // Handle save from edit dialog
+  const handleUserSaved = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   // Define user table columns
   const userColumns = useMemo<Column<User>[]>(
@@ -212,11 +235,6 @@ export default function AdminPage() {
     }),
     [users]
   );
-
-  // Handle user add
-  const handleAddUser = useCallback(() => {
-    // Implement user add functionality
-  }, []);
 
   return (
     <Container maxWidth="lg">
@@ -443,6 +461,15 @@ export default function AdminPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* User Editor Dialog */}
+      <UserEditorDialog
+        open={showEditDialog}
+        onClose={handleCloseEditDialog}
+        user={selectedUser}
+        onSaved={handleUserSaved}
+        isNewUser={isNewUser}
+      />
     </Container>
   );
 }

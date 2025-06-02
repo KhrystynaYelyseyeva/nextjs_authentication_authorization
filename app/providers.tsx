@@ -18,9 +18,9 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <ThemeRegistry>
-      <AuthProvider>
-        <ApolloProvider>{children}</ApolloProvider>
-      </AuthProvider>
+      <ApolloProvider>
+        <AuthProvider>{children}</AuthProvider>
+      </ApolloProvider>
     </ThemeRegistry>
   );
 }

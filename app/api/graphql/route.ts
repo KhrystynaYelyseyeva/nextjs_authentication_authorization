@@ -28,24 +28,49 @@ const server = new ApolloServer({
   resolvers,
 });
 
-// Handler for Next.js API route
 const handler = startServerAndCreateNextHandler(server, {
   context: async (req) => {
-    // Extract token from cookies
-    const accessToken = req.cookies.accessToken;
+    // Extract cookies from the request
+    const cookies = req.cookies || {};
+
+    // Extract tokens from cookies
+    const accessToken = cookies.accessToken;
+    const refreshToken = cookies.refreshToken;
 
     let userId = null;
     let role = null;
 
-    // Try to verify access token
+    // Try to verify access token first
     if (accessToken) {
       try {
         const payload = await verifyToken(accessToken);
         userId = payload.userId;
         role = payload.role;
       } catch (error) {
-        // Access token is invalid - don't try to handle it here
-        console.error("Access token validation error:", error);
+        console.log(
+          "Access token verification failed, trying refresh token",
+          error
+        );
+
+        // If access token failed, try refresh token
+        if (refreshToken) {
+          try {
+            const payload = await verifyToken(refreshToken);
+            userId = payload.userId;
+            role = payload.role;
+          } catch (error) {
+            console.error("Both tokens are invalid:", error);
+          }
+        }
+      }
+    } else if (refreshToken) {
+      // No access token, but we have refresh token
+      try {
+        const payload = await verifyToken(refreshToken);
+        userId = payload.userId;
+        role = payload.role;
+      } catch (error) {
+        console.error("Refresh token verification failed:", error);
       }
     }
 

@@ -124,8 +124,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } else {
           dispatch({ type: "AUTH_LOGOUT" });
 
-          // Only redirect if not already on login or signup
-          if (pathname !== "/login" && pathname !== "/signup") {
+          // Only redirect if not already on login or signup or home
+          if (
+            pathname !== "/login" &&
+            pathname !== "/signup" &&
+            pathname !== "/"
+          ) {
             router.push("/login");
           }
         }

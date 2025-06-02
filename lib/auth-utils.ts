@@ -50,13 +50,13 @@ export async function generateRefreshToken(
 export async function verifyToken(token: string): Promise<JwtPayload> {
   try {
     const { payload } = await jwtVerify(token, getJwtSecretKey());
+
     return {
       userId: payload.userId as string,
       role: payload.role as string,
     };
   } catch (error) {
-    console.error("Token verification failed:", error);
-    return { userId: "", role: "" };
+    throw new Error(`Token verification failed :${error}`);
   }
 }
 
@@ -112,15 +112,5 @@ export async function comparePasswords(
   password: string,
   hash: string
 ): Promise<boolean> {
-  // const test = await bcrypt.hash(
-  //   password,
-  //   "efbdc914ba7863424ec268125f566fb9332a487c961121ad6682b14a9d202766"
-  // );
-  console.log("🚀 ~ password:", {
-    password,
-    hash,
-    bcrypt: await bcrypt.compare(password, hash),
-    // test,
-  });
   return await bcrypt.compare(password, hash);
 }
