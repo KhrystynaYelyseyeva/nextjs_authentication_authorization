@@ -68,7 +68,7 @@ const refreshAccessToken = async (): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error("Error refreshing token:", error);
+    console.error("Apollo Client - Error refreshing token:", error);
     isRefreshing = false;
     processQueue(false);
     return false;
@@ -110,15 +110,23 @@ const errorLink = onError(
                   observer.error(err);
 
                   // Redirect to login if needed
-                  window.location.href = "/login";
+                  if (typeof window !== "undefined") {
+                    window.location.href = "/login";
+                  }
                 }
               })
-              .catch(() => {
+              .catch((refreshError) => {
+                console.error(
+                  "Apollo Client - Token refresh threw exception:",
+                  refreshError
+                );
                 // Token refresh threw an exception
                 observer.error(err);
 
                 // Redirect to login
-                window.location.href = "/login";
+                if (typeof window !== "undefined") {
+                  window.location.href = "/login";
+                }
               });
           });
         }
@@ -126,7 +134,7 @@ const errorLink = onError(
     }
 
     if (networkError) {
-      console.error(`[Network error]: ${networkError}`);
+      console.error(`Apollo Client - Network error:`, networkError);
       // Check if it's an unauthorized error
       if (
         typeof networkError === "object" &&
@@ -137,17 +145,22 @@ const errorLink = onError(
         // Try to refresh the token
         refreshAccessToken().catch(() => {
           // Redirect to login if refresh fails
-          window.location.href = "/login";
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
         });
       }
     }
   }
 );
 
-// HTTP link
+// HTTP link with better cookie handling
 const httpLink = new HttpLink({
   uri: "/api/graphql",
   credentials: "include", // Important for cookies
+  fetchOptions: {
+    credentials: "include", // Ensure cookies are always sent
+  },
 });
 
 // Create Apollo Client instance
@@ -158,6 +171,7 @@ export const createApolloClient = () => {
     defaultOptions: {
       watchQuery: {
         fetchPolicy: "cache-and-network",
+        errorPolicy: "all",
       },
       query: {
         fetchPolicy: "network-only",

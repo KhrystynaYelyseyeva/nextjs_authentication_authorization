@@ -5,6 +5,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { resolvers } from "@/graphql/resolvers";
 import { verifyToken } from "@/lib/auth-utils";
+import { NextRequest } from "next/server";
 
 // Initialize Prisma Client
 const prisma = new PrismaClient();
@@ -29,49 +30,58 @@ const server = new ApolloServer({
 });
 
 const handler = startServerAndCreateNextHandler(server, {
-  context: async (req) => {
-    // Extract cookies from the request
-    const cookies = req.cookies || {};
-
-    // Extract tokens from cookies
-    const accessToken = cookies.accessToken;
-    const refreshToken = cookies.refreshToken;
-
+  context: async (req: NextRequest) => {
     let userId = null;
     let role = null;
 
-    // Try to verify access token first
-    if (accessToken) {
-      try {
-        const payload = await verifyToken(accessToken);
-        userId = payload.userId;
-        role = payload.role;
-      } catch (error) {
-        console.log(
-          "Access token verification failed, trying refresh token",
-          error
-        );
+    try {
+      // Get tokens from cookies using the NextRequest cookies API
+      const accessToken = req.cookies.get("accessToken")?.value;
+      const refreshToken = req.cookies.get("refreshToken")?.value;
 
-        // If access token failed, try refresh token
-        if (refreshToken) {
-          try {
-            const payload = await verifyToken(refreshToken);
-            userId = payload.userId;
-            role = payload.role;
-          } catch (error) {
-            console.error("Both tokens are invalid:", error);
+      // Try to verify access token first
+      if (accessToken) {
+        try {
+          const payload = await verifyToken(accessToken);
+          userId = payload.userId;
+          role = payload.role;
+        } catch (error) {
+          console.log(
+            "GraphQL Context - Access token verification failed:",
+            error
+          );
+
+          // If access token failed, try refresh token
+          if (refreshToken) {
+            try {
+              const payload = await verifyToken(refreshToken);
+              userId = payload.userId;
+              role = payload.role;
+            } catch (refreshError) {
+              console.error(
+                "GraphQL Context - Both tokens are invalid:",
+                refreshError
+              );
+            }
           }
         }
+      } else if (refreshToken) {
+        // No access token, but we have refresh token
+        try {
+          const payload = await verifyToken(refreshToken);
+          userId = payload.userId;
+          role = payload.role;
+        } catch (error) {
+          console.error(
+            "GraphQL Context - Refresh token verification failed:",
+            error
+          );
+        }
+      } else {
+        console.log("GraphQL Context - No tokens found in cookies");
       }
-    } else if (refreshToken) {
-      // No access token, but we have refresh token
-      try {
-        const payload = await verifyToken(refreshToken);
-        userId = payload.userId;
-        role = payload.role;
-      } catch (error) {
-        console.error("Refresh token verification failed:", error);
-      }
+    } catch (error) {
+      console.error("GraphQL Context - Unexpected error:", error);
     }
 
     return {
