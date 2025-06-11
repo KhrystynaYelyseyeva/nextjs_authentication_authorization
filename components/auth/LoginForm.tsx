@@ -58,9 +58,6 @@ export default function LoginForm() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    // if (isAuthenticated && !authLoading) {
-    //   router.push(returnTo);
-    // }
     // Skip first render and only redirect if authenticated AND not already attempted
     if (isAuthenticated && !redirectAttempted.current && !authLoading) {
       redirectAttempted.current = true;

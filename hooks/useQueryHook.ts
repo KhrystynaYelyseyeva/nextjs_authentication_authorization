@@ -82,10 +82,10 @@ export function useEnhancedMutation<
 
   // Enhanced mutation function with try/catch
   const enhancedMutate = useCallback(
-    async (variables: TVariables) => {
+    async (options: { variables?: TVariables }) => {
       try {
         clearError();
-        return await mutateFunction({ variables });
+        return await mutateFunction(options);
       } catch {
         // Apollo already handles the error through the onError callback
         // This catch is just to prevent unhandled promise rejections

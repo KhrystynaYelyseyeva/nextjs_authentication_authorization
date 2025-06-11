@@ -10,6 +10,22 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: true, // Enable CSS optimization
   },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      // Ignore specific files/directories from hot reload
+      config.watchOptions = {
+        ignored: [
+          "**/node_modules/**",
+          "**/.git/**",
+          "**/.next/**",
+          "**/dist/**",
+          "**/build/**",
+          // Add any other directories that shouldn't trigger rebuilds
+        ],
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
