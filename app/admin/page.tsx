@@ -7,8 +7,6 @@ import {
   Box,
   Paper,
   Grid,
-  Card,
-  CardContent,
   Chip,
   Avatar,
   CircularProgress,
@@ -19,15 +17,10 @@ import {
   DialogActions,
   IconButton,
   Tooltip,
-  LinearProgress,
 } from "@mui/material";
 import {
   AdminPanelSettings,
   PersonOutline,
-  SecurityOutlined,
-  PeopleOutline,
-  BarChartOutlined,
-  SettingsOutlined,
   Edit,
   Delete,
   Add,
@@ -222,19 +215,6 @@ export default function AdminPage() {
 
   // Calculate system statistics
   const users = useMemo(() => data?.users || [], [data]);
-  const systemStats = useMemo(
-    () => ({
-      totalUsers: users.length,
-      activeUsers: users.length, // Assuming all users are active
-      adminUsers: users.filter((u) => u.role === "ADMIN").length,
-      systemUptime: "99.98%",
-      serverLoad: "42%",
-      databaseSize: "1.2 GB",
-      activeLogins: "2",
-      failedLoginAttempts: "5",
-    }),
-    [users]
-  );
 
   return (
     <Container maxWidth="lg">
@@ -287,118 +267,6 @@ export default function AdminPage() {
             </Grid>
           </Grid>
         </Paper>
-
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} md={6} lg={3}>
-            <Card sx={{ height: "100%", borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <PeopleOutline
-                    color="secondary"
-                    sx={{ fontSize: 28, mr: 1 }}
-                  />
-                  <Typography variant="h6" color="text.secondary">
-                    Total Users
-                  </Typography>
-                </Box>
-                <Typography variant="h3" component="div" fontWeight="500">
-                  {systemStats.totalUsers}
-                </Typography>
-                <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-                  <Chip
-                    size="small"
-                    label={`${systemStats.activeUsers} active`}
-                    color="success"
-                    variant="outlined"
-                  />
-                  <Chip
-                    size="small"
-                    label={`${systemStats.adminUsers} admins`}
-                    color="secondary"
-                    variant="outlined"
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={3}>
-            <Card sx={{ height: "100%", borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <SecurityOutlined
-                    color="error"
-                    sx={{ fontSize: 28, mr: 1 }}
-                  />
-                  <Typography variant="h6" color="text.secondary">
-                    Security Status
-                  </Typography>
-                </Box>
-                <Typography variant="h3" component="div" fontWeight="500">
-                  Good
-                </Typography>
-                <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-                  <Chip
-                    size="small"
-                    label={`${systemStats.failedLoginAttempts} failed attempts`}
-                    color="warning"
-                    variant="outlined"
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={3}>
-            <Card sx={{ height: "100%", borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <BarChartOutlined
-                    color="primary"
-                    sx={{ fontSize: 28, mr: 1 }}
-                  />
-                  <Typography variant="h6" color="text.secondary">
-                    System Load
-                  </Typography>
-                </Box>
-                <Typography variant="h3" component="div" fontWeight="500">
-                  {systemStats.serverLoad}
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={parseInt(systemStats.serverLoad)}
-                    color="primary"
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6} lg={3}>
-            <Card sx={{ height: "100%", borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <SettingsOutlined color="info" sx={{ fontSize: 28, mr: 1 }} />
-                  <Typography variant="h6" color="text.secondary">
-                    System Uptime
-                  </Typography>
-                </Box>
-                <Typography variant="h3" component="div" fontWeight="500">
-                  {systemStats.systemUptime}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: 1 }}
-                >
-                  Last restart: 14 days ago
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
 
         {/* User Management Table */}
         <Box sx={{ mb: 4, position: "relative" }}>

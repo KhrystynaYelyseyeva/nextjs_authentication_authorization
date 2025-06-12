@@ -87,11 +87,9 @@ export default function Home() {
                       Admin User
                     </Typography>
                     <Typography variant="body2">
-                      Email: admin@example.com
+                      Email: adminU@example.com
                     </Typography>
-                    <Typography variant="body2">
-                      Password: password123
-                    </Typography>
+                    <Typography variant="body2">Password: Admin123</Typography>
                   </Paper>
                 </Grid>
 
@@ -104,11 +102,9 @@ export default function Home() {
                       Regular User
                     </Typography>
                     <Typography variant="body2">
-                      Email: user@example.com
+                      Email: simpleU@example.com
                     </Typography>
-                    <Typography variant="body2">
-                      Password: password123
-                    </Typography>
+                    <Typography variant="body2">Password: Simple123</Typography>
                   </Paper>
                 </Grid>
               </Grid>
