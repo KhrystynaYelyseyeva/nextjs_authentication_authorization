@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -18,7 +18,7 @@ import {
   InputAdornment,
   IconButton,
   Alert,
-  SelectChangeEvent, // Import the correct event type
+  SelectChangeEvent,
 } from "@mui/material";
 import {
   Visibility,
@@ -31,8 +31,8 @@ import {
 import { useForm } from "@/hooks/useForm";
 import { User, UserRole } from "@/types/auth-types";
 import { useEnhancedMutation } from "@/hooks/useQueryHook";
-import { UPDATE_USER_MUTATION } from "@/graphql/types";
-import { userEditSchema } from "@/validationSchemas"; // Assuming this exists
+import { UPDATE_USER_MUTATION, SIGNUP_MUTATION } from "@/graphql/types";
+import { editUserSchema, newUserSchema } from "@/validationSchemas";
 
 interface UserEditorDialogProps {
   open: boolean;
@@ -62,14 +62,17 @@ export default function UserEditorDialog({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Initialize form with empty values or existing user data
-  const initialValues: UserFormData = {
-    name: user?.name || "",
-    email: user?.email || "",
-    role: (user?.role as UserRole) || "USER",
-    password: "",
-    confirmPassword: "",
-  };
+  // Memoize initial values to prevent recreation on every render
+  const initialValues = useMemo<UserFormData>(
+    () => ({
+      name: user?.name || "",
+      email: user?.email || "",
+      role: (user?.role as UserRole) || "USER",
+      password: "",
+      confirmPassword: "",
+    }),
+    [user?.name, user?.email, user?.role]
+  );
 
   // Update user mutation
   const { mutate: updateUser, error: updateError } = useEnhancedMutation(
@@ -82,19 +85,20 @@ export default function UserEditorDialog({
     }
   );
 
-  // Setup form with validation
-  const {
-    values,
-    errors,
-    handleChange,
-    handleSubmit,
-    setFieldValue,
-    resetForm,
-    isSubmitting,
-  } = useForm<UserFormData>(
-    initialValues,
-    userEditSchema,
-    async (formValues) => {
+  // Create user mutation
+  const { mutate: createUser, error: createError } = useEnhancedMutation(
+    SIGNUP_MUTATION,
+    {
+      onCompleted: () => {
+        onSaved();
+        onClose();
+      },
+    }
+  );
+
+  // Memoize the submit handler to prevent recreation
+  const handleFormSubmit = useCallback(
+    async (formValues: UserFormData) => {
       try {
         // Extract relevant fields for mutation
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -107,7 +111,16 @@ export default function UserEditorDialog({
 
         // Call mutation
         if (isNewUser) {
-          // TODO: Call signup mutation
+          // Create new user using signup mutation
+          await createUser({
+            variables: {
+              input: {
+                name: userData.name,
+                email: userData.email,
+                password: userData.password, // Required for new users
+              },
+            },
+          });
         } else if (user) {
           // Call update mutation
           await updateUser({
@@ -120,40 +133,62 @@ export default function UserEditorDialog({
       } catch (error) {
         console.error("Error saving user:", error);
       }
-    }
+    },
+    [isNewUser, user, updateUser, createUser]
+  );
+
+  // Setup form with validation - use memoized values
+  const {
+    values,
+    errors,
+    handleChange,
+    handleSubmit,
+    setFieldValue,
+    resetForm,
+    isSubmitting,
+  } = useForm<UserFormData>(
+    initialValues,
+    isNewUser ? newUserSchema : editUserSchema,
+    handleFormSubmit
   );
 
   // Reset form when dialog opens/closes or user changes
+  // Fix: Use individual user properties instead of user object
   useEffect(() => {
-    if (open && user) {
+    if (open) {
       resetForm();
     }
-  }, [open, user, resetForm]);
+  }, [open, user?.id, user?.name, user?.email, user?.role, resetForm]);
 
-  // Toggle password visibility
+  // Toggle password visibility - memoized to prevent recreation
   const handleTogglePassword = useCallback(() => {
     setShowPassword((prev) => !prev);
   }, []);
 
-  // Toggle confirm password visibility
+  // Toggle confirm password visibility - memoized to prevent recreation
   const handleToggleConfirmPassword = useCallback(() => {
     setShowConfirmPassword((prev) => !prev);
   }, []);
 
-  // Handle dialog close
+  // Handle dialog close - memoized to prevent recreation
   const handleClose = useCallback(() => {
     if (!isSubmitting) {
       onClose();
     }
   }, [isSubmitting, onClose]);
 
-  // Handle role change - special handler for Select component
+  // Handle role change - memoized to prevent recreation
   const handleRoleChange = useCallback(
     (event: SelectChangeEvent<UserRole>) => {
       setFieldValue("role", event.target.value as UserRole);
     },
     [setFieldValue]
   );
+
+  // Handle form submission - memoized to prevent recreation
+  const handleFormSubmitWrapper = useCallback(() => {
+    handleSubmit();
+  }, [handleSubmit]);
 
   return (
     <Dialog
@@ -217,7 +252,7 @@ export default function UserEditorDialog({
             }}
           />
 
-          {/* Role select - Use the specific handler for Select */}
+          {/* Role select */}
           <FormControl fullWidth margin="normal" error={!!errors.role}>
             <InputLabel id="role-label">Role</InputLabel>
             <Select
@@ -235,7 +270,7 @@ export default function UserEditorDialog({
             {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
           </FormControl>
 
-          {/* Password fields - only required for new users */}
+          {/* Password fields */}
           <TextField
             margin="normal"
             fullWidth
@@ -277,7 +312,7 @@ export default function UserEditorDialog({
             }}
           />
 
-          {/* Confirm password field - only required for new users or if password is entered */}
+          {/* Confirm password field */}
           <TextField
             margin="normal"
             fullWidth
@@ -313,9 +348,9 @@ export default function UserEditorDialog({
           />
 
           {/* Display error if any */}
-          {updateError && (
+          {(updateError || createError) && (
             <Alert severity="error" sx={{ mt: 2 }}>
-              {updateError}
+              {updateError || createError}
             </Alert>
           )}
         </Box>
@@ -330,7 +365,7 @@ export default function UserEditorDialog({
           Cancel
         </Button>
         <Button
-          onClick={() => handleSubmit()}
+          onClick={handleFormSubmitWrapper}
           color="primary"
           variant="contained"
           disabled={isSubmitting}

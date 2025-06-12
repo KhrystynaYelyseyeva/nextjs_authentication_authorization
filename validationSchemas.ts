@@ -36,14 +36,50 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
-// User edit schema - handles both new users and existing user edits
+// Enhanced user edit schema - handles both new users and existing user edits
 export const userEditSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: emailSchema,
     role: z.enum(["USER", "ADMIN"] as const),
-    // Optional password for existing users (empty string allowed)
+    // Password validation changes based on context
     password: z.union([passwordSchema, z.string().length(0)]),
+    confirmPassword: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    // If password is provided, validate confirm password
+    if (data.password && data.password.length > 0) {
+      if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Passwords do not match",
+          path: ["confirmPassword"],
+        });
+      }
+    }
+  });
+
+// Separate schema for new user creation (password required)
+export const newUserSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: emailSchema,
+    role: z.enum(["USER", "ADMIN"] as const),
+    password: passwordSchema, // Always required for new users
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+// Schema for editing existing users (password optional)
+export const editUserSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: emailSchema,
+    role: z.enum(["USER", "ADMIN"] as const),
+    password: z.union([passwordSchema, z.string().length(0)]), // Optional
     confirmPassword: z.string(),
   })
   .refine(
