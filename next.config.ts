@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
           // Add any other directories that shouldn't trigger rebuilds
         ],
       };
+      config.infrastructureLogging = {
+        level: "error",
+      };
     }
     return config;
   },
