@@ -8,6 +8,7 @@ export interface User {
   name: string;
   email: string;
   role: "USER" | "ADMIN";
+  signature?: string | null; // Base64 encoded signature data
 }
 
 export interface LoginInput {
@@ -26,6 +27,7 @@ export interface UpdateUserInput {
   email?: string;
   password?: string;
   role?: string;
+  signature?: string | null; // Base64 encoded signature data
 }
 
 export interface AuthPayload {
@@ -68,6 +70,10 @@ export interface UpdateUserMutationResult {
   updateUser: User;
 }
 
+export interface UpdateSignatureMutationResult {
+  updateSignature: User;
+}
+
 export interface DeleteUserMutationResult {
   deleteUser: DeleteUserPayload;
 }
@@ -84,6 +90,7 @@ export const ME_QUERY = gql`
       name
       email
       role
+      signature
     }
   }
 `;
@@ -95,6 +102,7 @@ export const USERS_QUERY = gql`
       name
       email
       role
+      signature
     }
   }
 `;
@@ -106,6 +114,7 @@ export const USER_QUERY = gql`
       name
       email
       role
+      signature
     }
   }
 `;
@@ -120,6 +129,7 @@ export const LOGIN_MUTATION = gql`
         name
         email
         role
+        signature
       }
     }
   }
@@ -134,6 +144,7 @@ export const SIGNUP_MUTATION = gql`
         name
         email
         role
+        signature
       }
     }
   }
@@ -146,6 +157,19 @@ export const UPDATE_USER_MUTATION = gql`
       name
       email
       role
+      signature
+    }
+  }
+`;
+
+export const UPDATE_SIGNATURE_MUTATION = gql`
+  mutation UpdateSignature($signature: String) {
+    updateSignature(signature: $signature) {
+      id
+      name
+      email
+      role
+      signature
     }
   }
 `;

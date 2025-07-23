@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  signature?: string | null; // Base64 encoded signature data
 }
 
 export interface AuthState {
@@ -38,6 +39,7 @@ export interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
+  updateSignature: (signature: string | null) => Promise<void>;
 }
 
 // GraphQL types and schemas

@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
         email: true,
         password: true,
         role: true,
+        signature: true,
       },
     });
 
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
           name: user.name,
           email: user.email,
           role: user.role,
+          signature: user.signature,
         },
       },
       { status: 200 }

@@ -1,16 +1,15 @@
-# schema.graphql
-
 type User {
   id: ID!
   name: String!
   email: String!
   role: String!
+  signature: String
   createdAt: String
   updatedAt: String
 }
 
 type AuthPayload {
-  token: String! # For backward compatibility
+  token: String!
   accessToken: String!
   refreshToken: String!
   user: User!
@@ -37,6 +36,7 @@ input UpdateUserInput {
   email: String
   password: String
   role: String
+  signature: String
 }
 
 type Query {
@@ -50,4 +50,5 @@ type Mutation {
   login(input: LoginInput!): AuthPayload!
   updateUser(id: ID!, input: UpdateUserInput!): User!
   deleteUser(id: ID!): DeleteUserPayload!
+  updateSignature(signature: String): User!
 }

@@ -43,6 +43,7 @@ export async function getCurrentUser(): Promise<User | null> {
         name: true,
         email: true,
         role: true,
+        signature: true,
       },
     });
 

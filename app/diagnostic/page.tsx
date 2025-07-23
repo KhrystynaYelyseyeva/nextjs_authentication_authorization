@@ -81,6 +81,7 @@ export default function AuthDiagnosticPage() {
                 name
                 email
                 role
+                signature
               }
             }
           `,

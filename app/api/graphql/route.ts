@@ -46,7 +46,7 @@ const handler = startServerAndCreateNextHandler(server, {
           userId = payload.userId;
           role = payload.role;
         } catch (error) {
-          console.log(
+          console.error(
             "GraphQL Context - Access token verification failed:",
             error
           );

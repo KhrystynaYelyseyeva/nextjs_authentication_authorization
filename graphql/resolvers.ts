@@ -33,6 +33,13 @@ const createForbiddenError = (message: string) =>
     },
   });
 
+// Validation helper for signature data
+const validateSignatureData = (signature: string): boolean => {
+  // Check if it's a valid base64 data URL for an image
+  const base64Pattern = /^data:image\/(png|jpeg|jpg|gif);base64,/;
+  return base64Pattern.test(signature);
+};
+
 export const resolvers = {
   Query: {
     me: async (_parent: any, _args: any, context: GraphQLContext) => {
@@ -44,6 +51,15 @@ export const resolvers = {
       // Get the user from the database
       return prisma.user.findUnique({
         where: { id: context.userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          signature: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
     },
 
@@ -169,6 +185,7 @@ export const resolvers = {
           email?: string;
           password?: string;
           role?: string;
+          signature?: string;
         };
       },
       context: GraphQLContext
@@ -190,6 +207,13 @@ export const resolvers = {
       // Only allow admins to change roles
       if (input.role && context.role !== "ADMIN") {
         throw createForbiddenError("Only admins can change user roles");
+      }
+
+      // Validate signature data if provided
+      if (input.signature && !validateSignatureData(input.signature)) {
+        throw new GraphQLError("Invalid signature data format", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
       }
 
       // Prepare update data
@@ -227,6 +251,25 @@ export const resolvers = {
       });
 
       return { success: true, message: "User deleted successfully" };
+    },
+
+    updateSignature: async (
+      _parent: any,
+      args: { signature?: string },
+      context: GraphQLContext
+    ) => {
+      // Check authentication
+      if (!context.userId) {
+        throw createAuthenticationError("Authentication required");
+      }
+
+      // Update user's signature
+      const updatedUser = await prisma.user.update({
+        where: { id: context.userId },
+        data: { signature: args.signature },
+      });
+
+      return updatedUser;
     },
   },
 };

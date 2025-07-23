@@ -24,6 +24,7 @@ import {
   Edit,
   Delete,
   Add,
+  Draw,
 } from "@mui/icons-material";
 import { useAuth } from "@/contexts/AuthContext";
 import { User } from "@/types/auth-types";
@@ -44,6 +45,7 @@ export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
 
   // Fetch users data
@@ -88,6 +90,12 @@ export default function AdminPage() {
     setShowDeleteDialog(true);
   }, []);
 
+  // Handle signature view
+  const handleViewSignature = useCallback((user: User) => {
+    setSelectedUser(user);
+    setShowSignatureDialog(true);
+  }, []);
+
   // Handle user delete
   const handleDeleteUser = useCallback(() => {
     if (selectedUser) {
@@ -112,6 +120,12 @@ export default function AdminPage() {
     setShowEditDialog(false);
     setSelectedUser(null);
     setIsNewUser(false);
+  }, []);
+
+  // Handle close signature dialog
+  const handleCloseSignatureDialog = useCallback(() => {
+    setShowSignatureDialog(false);
+    setSelectedUser(null);
   }, []);
 
   // Handle save from edit dialog
@@ -168,6 +182,32 @@ export default function AdminPage() {
         sortable: true,
       },
       {
+        id: "signature",
+        label: "Signature",
+        minWidth: 120,
+        align: "center",
+        format: (value, row) => (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            {value ? (
+              <Tooltip title="View signature">
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewSignature(row);
+                  }}
+                  color="primary"
+                >
+                  <Draw fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              ""
+            )}
+          </Box>
+        ),
+      },
+      {
         id: "id",
         label: "ID",
         minWidth: 170,
@@ -210,7 +250,7 @@ export default function AdminPage() {
         ),
       },
     ],
-    [handleEditUser, handleDeleteConfirm, user?.id]
+    [handleEditUser, handleDeleteConfirm, handleViewSignature, user?.id]
   );
 
   // Calculate system statistics
@@ -327,6 +367,52 @@ export default function AdminPage() {
           >
             {deleteLoading ? "Deleting..." : "Delete"}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Signature View Dialog */}
+      <Dialog
+        open={showSignatureDialog}
+        onClose={handleCloseSignatureDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>User Signature - {selectedUser?.name}</DialogTitle>
+        <DialogContent>
+          {selectedUser?.signature ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 200,
+                border: "1px solid #ddd",
+                borderRadius: 1,
+                backgroundColor: "#f9f9f9",
+                p: 2,
+              }}
+            >
+              <img
+                src={selectedUser.signature}
+                alt={`${selectedUser.name}'s signature`}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: 300,
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <Draw sx={{ fontSize: 48, color: "text.secondary", mb: 2 }} />
+              <Typography variant="body1" color="text.secondary">
+                This user has not created a signature yet.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseSignatureDialog}>Close</Button>
         </DialogActions>
       </Dialog>
 

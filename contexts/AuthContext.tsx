@@ -41,7 +41,8 @@ type AuthAction =
   | { type: "AUTH_SUCCESS"; payload: User }
   | { type: "AUTH_ERROR"; payload: string }
   | { type: "AUTH_LOGOUT" }
-  | { type: "CLEAR_ERROR" };
+  | { type: "CLEAR_ERROR" }
+  | { type: "UPDATE_USER"; payload: User };
 
 // Reducer to handle authentication state
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
@@ -60,6 +61,13 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAdmin: action.payload.role === UserRole.ADMIN,
         loading: false,
         error: null,
+      };
+    case "UPDATE_USER":
+      return {
+        ...state,
+        user: action.payload,
+        isAuthenticated: true,
+        isAdmin: action.payload.role === UserRole.ADMIN,
       };
     case "AUTH_ERROR":
       return {
@@ -240,6 +248,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [getUser]);
 
+  // Update signature handler
+  const updateSignature = useCallback(async (signature: string | null) => {
+    try {
+      const response = await fetch("/api/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          query: `
+            mutation UpdateSignature($signature: String) {
+              updateSignature(signature: $signature) {
+                id
+                name
+                email
+                role
+                signature
+              }
+            }
+          `,
+          variables: { signature },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(
+          result.errors[0]?.message || "Failed to update signature"
+        );
+      }
+
+      if (result.data?.updateSignature) {
+        dispatch({ type: "UPDATE_USER", payload: result.data.updateSignature });
+      }
+    } catch (error) {
+      console.error("Update signature error:", error);
+      throw error;
+    }
+  }, []);
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -247,6 +297,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logout,
     clearError,
     refreshUser,
+    updateSignature,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -114,7 +114,6 @@ export const seedInitialUsers = async () => {
 
   if (!adminExists) {
     await createUser("Admin User", adminEmail, "password123", "ADMIN");
-    console.log("Admin user created");
   }
 
   // Check if regular user exists
@@ -122,6 +121,5 @@ export const seedInitialUsers = async () => {
 
   if (!userExists) {
     await createUser("Regular User", userEmail, "password123");
-    console.log("Regular user created");
   }
 };

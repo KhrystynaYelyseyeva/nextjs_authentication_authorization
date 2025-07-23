@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
         name: true,
         email: true,
         role: true,
+        signature: true,
       },
     });
 
@@ -90,6 +91,7 @@ export async function GET(request: NextRequest) {
           name: user.name,
           email: user.email,
           role: user.role,
+          signature: user.signature,
         },
       },
       { status: 200 }
