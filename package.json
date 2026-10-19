@@ -47,5 +47,11 @@
     "eslint-config-next": "15.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "prisma@6.5.0": true,
+    "@prisma/client@6.5.0": true,
+    "@prisma/engines@6.5.0": true,
+    "esbuild@0.25.1": true
   }
 }
