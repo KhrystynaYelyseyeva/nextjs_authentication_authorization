@@ -1,4 +1,5 @@
 # Next.js GraphQL Authentication & Authorization System
+[DEMO](https://nextjsauthenticationauthorization-production.up.railway.app/)
 
 A comprehensive full-stack authentication and authorization system built with **Next.js 15**, **GraphQL**, **PostgreSQL**, and **JWT tokens**.
 
