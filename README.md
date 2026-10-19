@@ -65,8 +65,8 @@ npm run dev
 
 Visit `http://localhost:3000` and use demo accounts:
 
-- **Admin**: `adminU@example.com` / `Admin123`
-- **User**: `simpleU@example.com` / `Simple123`
+- **Admin**: `admin@example.com` / `password123`
+- **User**: `simple@example.com` / `password123`
 
 ---
 
